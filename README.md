@@ -10,4 +10,4 @@ Scripts used to optimize the locations of vaccination sites via the hybrid recur
 * **optimize...R** - each script file runs a single round of the hybrid algorithm
   - The values of alpha and beta are specified in the portion of the script name that comes after the underscore "_" (alpha = beta = 0 are specified as "queuenaive")
   - The round of the optimization is given by the number following optimize
-  - E.g., optimize2_alpha0.1beta0.1.R was used to run the second round of optimization for the high-attrition scenario (alpha = beta = 0.1)  
+  - So as an example, optimize2_alpha0.1beta0.1.R was used to run the second round of optimization for the high-attrition scenario (alpha = beta = 0.1)  
