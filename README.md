@@ -29,6 +29,8 @@ Scripts used to run the queueing simulations, generate figures, and conduct the 
 
 ## Data files
 
-Non-sensitive data used in the analysis are provided as single RDA file, which can be found in the **data** folder.
+Non-sensitive data used in the analysis are provided as single RDA file, which can be found in the **data** folder. Note that the locations of houses in the study area and the probability-distance matrix (containing the probability of each household participating in the campaign for all possible vaccination sites) have been removed to protect privacy.
 * **optimization_data.rda**
-  - asa - 
+  - asa: shapefile of Alto Selva Algre (study area)
+  - supplycoord: coordinates of the potential vaccination sites in UTM projection
+  
