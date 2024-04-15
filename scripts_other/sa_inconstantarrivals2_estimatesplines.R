@@ -44,17 +44,14 @@ SummarizeData <- function(df){
   
 }
 
-nrep_df2 <- nrep_df %>%
-  group_by(n, rep) %>%
-  summarise(num_vaxed = sum(num_vaxed),
-            num_attrition = sum(num_attrition)) %>%
-  mutate(num_arrivals = n*4) %>%
-  select(rep, num_arrivals, num_vaxed, num_attrition)
-
-PlotVax <- function(df, title = NULL, margin = 0){
+PlotVax <- function(df, spline, title = NULL, margin = 0){
+  
+  df$pred <- predict(spline, data.frame(num_arrivals = df$num_arrivals))
+  
   ggplot(df, aes(x = num_arrivals)) +
-    geom_line(aes(y = median), linetype = "dashed", color = "skyblue3", lwd = 1.1) +
+    geom_line(aes(y = median), color = "skyblue3", lwd = 1.1) +
     geom_ribbon(aes(ymin = lower_25, ymax = upper_75), fill = "skyblue3", alpha = 0.3) +
+    geom_line(aes(y = pred), linetype = "dashed", color = "black", lwd = 1) +
     xlab("Number of dogs arrived") +
     ylab("Number vaccinated") +
     ggtitle(title) +
@@ -66,10 +63,14 @@ PlotVax <- function(df, title = NULL, margin = 0){
           plot.margin = unit(rep(margin, 4), "cm")) 
 }
 
-PlotAttrition <- function(df, title = NULL, margin = 0){
+PlotAttrition <- function(df, spline, title = NULL, margin = 0){
+  
+  df$pred <- predict(spline, data.frame(num_arrivals = df$num_arrivals))
+  
   ggplot(df, aes(x = num_arrivals)) +
     geom_line(aes(y = median), linetype = "dashed", color = "#C00000", lwd = 1.1) +
     geom_ribbon(aes(ymin = lower_25, ymax = upper_75), fill = "#C00000", alpha = 0.3) +
+    geom_line(aes(y = pred), linetype = "dashed", color = "black", lwd = 1) +
     xlab("Number of dogs arrived") +
     ylab("Number lost to attrition") +
     ggtitle(title) +
@@ -97,28 +98,52 @@ d_low <- read_rds("_output manuscript/simulations_arrdensityD_lowattrition.rds")
 d_high <- read_rds("_output manuscript/simulations_arrdensityD_highattrition.rds")
 
 #------------------------------------------------------------------------------
-# 2. Plot simulation results
+# 2. Create spline functions
 #------------------------------------------------------------------------------
 
-# Plot simulation results for densities + low-attrition parameters
-v_a <- PlotVax(SummarizeData(a_low)$vax_df, "Density A, low attrition", 1)
-v_b <- PlotVax(SummarizeData(b_low)$vax_df, "Density B, low attrition", 1)
-v_c <- PlotVax(SummarizeData(c_low)$vax_df, "Density C, low attrition", 1)
-v_d <- PlotVax(SummarizeData(d_low)$vax_df, "Density D, low attrition", 1)
-a_a <- PlotAttrition(SummarizeData(a_low)$attrition_df, "Density A, low attrition", 1)
-a_b <- PlotAttrition(SummarizeData(b_low)$attrition_df, "Density B, low attrition", 1)
-a_c <- PlotAttrition(SummarizeData(c_low)$attrition_df, "Density C, low attrition", 1)
-a_d <- PlotAttrition(SummarizeData(d_low)$attrition_df, "Density D, low attrition", 1)
+# Create splines for densities a-d + low-attrition parameters
+spline_a_vax <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(a_low)$vax_df)
+spline_a_att <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(a_low)$attrition_df)
+spline_b_vax <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(b_low)$vax_df)
+spline_b_att <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(b_low)$attrition_df)
+spline_c_vax <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(c_low)$vax_df)
+spline_c_att <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(c_low)$attrition_df)
+spline_d_vax <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(d_low)$vax_df)
+spline_d_att <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(d_low)$attrition_df)
 
-# Plot simulation results for densities + high-attrition parameters
-v_ah <- PlotVax(SummarizeData(a_low)$vax_df, "Density A, high attrition", 1)
-v_bh <- PlotVax(SummarizeData(b_low)$vax_df, "Density B, high attrition", 1)
-v_ch <- PlotVax(SummarizeData(c_low)$vax_df, "Density C, high attrition", 1)
-v_dh <- PlotVax(SummarizeData(d_low)$vax_df, "Density D, high attrition", 1)
-a_ah <- PlotAttrition(SummarizeData(a_low)$attrition_df, "Density A, high attrition", 1)
-a_bh <- PlotAttrition(SummarizeData(b_low)$attrition_df, "Density B, high attrition", 1)
-a_ch <- PlotAttrition(SummarizeData(c_low)$attrition_df, "Density C, high attrition", 1)
-a_dh <- PlotAttrition(SummarizeData(d_low)$attrition_df, "Density D, high attrition", 1)
+# Create splines for densities a-d + high-attrition parameters
+spline_ah_vax <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(a_high)$vax_df)
+spline_ah_att <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(a_high)$attrition_df)
+spline_bh_vax <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(b_high)$vax_df)
+spline_bh_att <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(b_high)$attrition_df)
+spline_ch_vax <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(c_high)$vax_df)
+spline_ch_att <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(c_high)$attrition_df)
+spline_dh_vax <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(d_high)$vax_df)
+spline_dh_att <- glm(median ~ns(num_arrivals, df = 7), data = SummarizeData(d_high)$attrition_df)
+
+#------------------------------------------------------------------------------
+# 3. Plot results
+#------------------------------------------------------------------------------
+
+# Plot simulation results and splines for densities a-d + low-attrition parameters
+v_a <- PlotVax(SummarizeData(a_low)$vax_df, spline_a_vax, "Density A, low attrition", 1)
+v_b <- PlotVax(SummarizeData(b_low)$vax_df, spline_b_vax, "Density B, low attrition", 1)
+v_c <- PlotVax(SummarizeData(c_low)$vax_df, spline_c_vax, "Density C, low attrition", 1)
+v_d <- PlotVax(SummarizeData(d_low)$vax_df, spline_d_vax, "Density D, low attrition", 1)
+a_a <- PlotAttrition(SummarizeData(a_low)$attrition_df, spline_a_att, "Density A, low attrition", 1)
+a_b <- PlotAttrition(SummarizeData(b_low)$attrition_df, spline_b_att, "Density B, low attrition", 1)
+a_c <- PlotAttrition(SummarizeData(c_low)$attrition_df, spline_c_att, "Density C, low attrition", 1)
+a_d <- PlotAttrition(SummarizeData(d_low)$attrition_df, spline_d_att, "Density D, low attrition", 1)
+
+# Plot simulation results and splines for densities a-d + high-attrition parameters
+v_ah <- PlotVax(SummarizeData(a_high)$vax_df, spline_ah_vax, "Density A, high attrition", 1)
+v_bh <- PlotVax(SummarizeData(b_high)$vax_df, spline_bh_vax, "Density B, high attrition", 1)
+v_ch <- PlotVax(SummarizeData(c_high)$vax_df, spline_ch_vax, "Density C, high attrition", 1)
+v_dh <- PlotVax(SummarizeData(d_high)$vax_df, spline_dh_vax, "Density D, high attrition", 1)
+a_ah <- PlotAttrition(SummarizeData(a_high)$attrition_df, spline_ah_att, "Density A, high attrition", 1)
+a_bh <- PlotAttrition(SummarizeData(b_high)$attrition_df, spline_bh_att, "Density B, high attrition", 1)
+a_ch <- PlotAttrition(SummarizeData(c_high)$attrition_df, spline_ch_att, "Density C, high attrition", 1)
+a_dh <- PlotAttrition(SummarizeData(d_high)$attrition_df, spline_dh_att, "Density D, high attrition", 1)
 
 pdf("_figures manuscript/R_output/sa_simulationresults.pdf", width = 24, height = 24)
 grid.arrange(v_a, a_a, v_ah, a_ah,
@@ -126,265 +151,3 @@ grid.arrange(v_a, a_a, v_ah, a_ah,
              v_c, a_c, v_ch, a_ch,
              v_d, a_d, v_dh, a_dh, ncol = 4)
 dev.off()
-
-#------------------------------------------------------------------------------
-# 3a. Distribution A - low
-#------------------------------------------------------------------------------
-
-output <- SummarizeData(a_low)
-PlotVax(output$vax_df)
-PlotAttrition(output$attrition_df)
-
-# Fit spline model to data
-spline_vax <- glm(median ~ns(num_arrivals, df = 7), data = output$vax_df)
-spline_att <- glm(median ~ns(num_arrivals, df = 7), data = output$attrition_df)
-
-# Check fit for vax spline
-plot(output$vax_df$num_arrivals, output$vax_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number vaccinated", 
-     main = "Density A, low attrition")
-points(output$vax_df$num_arrivals, 
-       predict(spline_vax, data.frame(num_arrivals = output$vax_df$num_arrivals)), 
-       type = "l", add = T, col = "skyblue3", lwd = 3)
-
-# Check fit for attrition spline
-plot(output$attrition_df$num_arrivals, output$attrition_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number lost to attrition",
-     main = "Density A, low attrition")
-points(output$attrition_df$num_arrivals, 
-       predict(spline_att, data.frame(num_arrivals = output$attrition_df$num_arrivals)), 
-       type = "l", add = T, col = "#C00000", lwd = 3)
-
-# Save splines
-write_rds(list(spline_vax = spline_vax, spline_att = spline_att), 
-          "_output manuscript/splines_a_low.rds")
-
-#------------------------------------------------------------------------------
-# 3b. Distribution A - high
-#------------------------------------------------------------------------------
-
-output <- SummarizeData(a_high)
-PlotVax(output$vax_df)
-PlotAttrition(output$attrition_df)
-
-# Fit spline model to data
-spline_vax <- glm(median ~ns(num_arrivals, df = 7), data = output$vax_df)
-spline_att <- glm(median ~ns(num_arrivals, df = 7), data = output$attrition_df)
-
-# Check fit for vax spline
-plot(output$vax_df$num_arrivals, output$vax_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number vaccinated",
-     main = "Density A, high attrition")
-points(output$vax_df$num_arrivals, 
-       predict(spline_vax, data.frame(num_arrivals = output$vax_df$num_arrivals)), 
-       type = "l", add = T, col = "skyblue3", lwd = 3)
-
-# Check fit for attrition spline
-plot(output$attrition_df$num_arrivals, output$attrition_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number lost to attrition",
-     main = "Density A, high attrition")
-points(output$attrition_df$num_arrivals, 
-       predict(spline_att, data.frame(num_arrivals = output$attrition_df$num_arrivals)), 
-       type = "l", add = T, col = "#C00000", lwd = 3)
-
-# Save splines
-write_rds(list(spline_vax = spline_vax, spline_att = spline_att), 
-          "_output manuscript/splines_a_high.rds")
-
-#------------------------------------------------------------------------------
-# 4a. Distribution B - low
-#------------------------------------------------------------------------------
-
-output <- SummarizeData(b_low)
-PlotVax(output$vax_df)
-PlotAttrition(output$attrition_df)
-
-# Fit spline model to data
-spline_vax <- glm(median ~ns(num_arrivals, df = 7), data = output$vax_df)
-spline_att <- glm(median ~ns(num_arrivals, df = 7), data = output$attrition_df)
-
-# Check fit for vax spline
-plot(output$vax_df$num_arrivals, output$vax_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number vaccinated",
-     main = "Density B, low attrition")
-points(output$vax_df$num_arrivals, 
-       predict(spline_vax, data.frame(num_arrivals = output$vax_df$num_arrivals)), 
-       type = "l", add = T, col = "skyblue3", lwd = 3)
-
-# Check fit for attrition spline
-plot(output$attrition_df$num_arrivals, output$attrition_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number lost to attrition",
-     main = "Density B, low attrition")
-points(output$attrition_df$num_arrivals, 
-       predict(spline_att, data.frame(num_arrivals = output$attrition_df$num_arrivals)), 
-       type = "l", add = T, col = "#C00000", lwd = 3)
-
-# Save splines
-write_rds(list(spline_vax = spline_vax, spline_att = spline_att), 
-          "_output manuscript/splines_b_low.rds")
-
-#------------------------------------------------------------------------------
-# 4b. Distribution B - high
-#------------------------------------------------------------------------------
-
-output <- SummarizeData(b_high)
-PlotVax(output$vax_df)
-PlotAttrition(output$attrition_df)
-
-# Fit spline model to data
-spline_vax <- glm(median ~ns(num_arrivals, df = 7), data = output$vax_df)
-spline_att <- glm(median ~ns(num_arrivals, df = 7), data = output$attrition_df)
-
-# Check fit for vax spline
-plot(output$vax_df$num_arrivals, output$vax_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number vaccinated",
-     main = "Density B, high attrition")
-
-points(output$vax_df$num_arrivals, 
-       predict(spline_vax, data.frame(num_arrivals = output$vax_df$num_arrivals)), 
-       type = "l", add = T, col = "skyblue3", lwd = 3)
-
-# Check fit for attrition spline
-plot(output$attrition_df$num_arrivals, output$attrition_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number lost to attrition",
-     main = "Density B, high attrition")
-
-points(output$attrition_df$num_arrivals, 
-       predict(spline_att, data.frame(num_arrivals = output$attrition_df$num_arrivals)), 
-       type = "l", add = T, col = "#C00000", lwd = 3)
-
-# Save splines
-write_rds(list(spline_vax = spline_vax, spline_att = spline_att), "_output manuscript/splines_b_high.rds")
-
-#------------------------------------------------------------------------------
-# 5a. Distribution C - low
-#------------------------------------------------------------------------------
-
-output <- SummarizeData(c_low)
-PlotVax(output$vax_df)
-PlotAttrition(output$attrition_df)
-
-# Fit spline model to data
-spline_vax <- glm(median ~ns(num_arrivals, df = 7), data = output$vax_df)
-spline_att <- glm(median ~ns(num_arrivals, df = 7), data = output$attrition_df)
-
-# Check fit for vax spline
-plot(output$vax_df$num_arrivals, output$vax_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number vaccinated",
-     main = "Density C, low attrition")
-points(output$vax_df$num_arrivals, 
-       predict(spline_vax, data.frame(num_arrivals = output$vax_df$num_arrivals)), 
-       type = "l", add = T, col = "skyblue3", lwd = 3)
-
-# Check fit for attrition spline
-plot(output$attrition_df$num_arrivals, output$attrition_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number lost to attrition",
-     main = "Density C, low attrition")
-points(output$attrition_df$num_arrivals, 
-       predict(spline_att, data.frame(num_arrivals = output$attrition_df$num_arrivals)), 
-       type = "l", add = T, col = "#C00000", lwd = 3)
-
-# Save splines
-write_rds(list(spline_vax = spline_vax, spline_att = spline_att), 
-          "_output manuscript/splines_c_low.rds")
-
-#------------------------------------------------------------------------------
-# 5b. Distribution C - high
-#------------------------------------------------------------------------------
-
-output <- SummarizeData(c_high)
-PlotVax(output$vax_df)
-PlotAttrition(output$attrition_df)
-
-# Fit spline model to data
-spline_vax <- glm(median ~ns(num_arrivals, df = 7), data = output$vax_df)
-spline_att <- glm(median ~ns(num_arrivals, df = 7), data = output$attrition_df)
-
-# Check fit for vax spline
-plot(output$vax_df$num_arrivals, output$vax_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number vaccinated",
-     main = "Density C, high attrition")
-points(output$vax_df$num_arrivals, 
-       predict(spline_vax, data.frame(num_arrivals = output$vax_df$num_arrivals)), 
-       type = "l", add = T, col = "skyblue3", lwd = 3)
-
-# Check fit for attrition spline
-plot(output$attrition_df$num_arrivals, output$attrition_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number lost to attrition",
-     main = "Density C, high attrition")
-
-points(output$attrition_df$num_arrivals, 
-       predict(spline_att, data.frame(num_arrivals = output$attrition_df$num_arrivals)), 
-       type = "l", add = T, col = "#C00000", lwd = 3)
-
-# Save splines
-write_rds(list(spline_vax = spline_vax, spline_att = spline_att), 
-          "_output manuscript/splines_c_high.rds")
-
-#------------------------------------------------------------------------------
-# 6a. Distribution D - low
-#------------------------------------------------------------------------------
-
-output <- SummarizeData(d_low)
-PlotVax(output$vax_df)
-PlotAttrition(output$attrition_df)
-
-# Fit spline model to data
-spline_vax <- glm(median ~ns(num_arrivals, df = 7), data = output$vax_df)
-spline_att <- glm(median ~ns(num_arrivals, df = 7), data = output$attrition_df)
-
-# Check fit for vax spline
-plot(output$vax_df$num_arrivals, output$vax_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number vaccinated",
-     main = "Density D, low attrition")
-
-points(output$vax_df$num_arrivals, 
-       predict(spline_vax, data.frame(num_arrivals = output$vax_df$num_arrivals)), 
-       type = "l", add = T, col = "skyblue3", lwd = 3)
-
-# Check fit for attrition spline
-plot(output$attrition_df$num_arrivals, output$attrition_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number lost to attrition",
-     main = "Density D, low attrition")
-
-points(output$attrition_df$num_arrivals, 
-       predict(spline_att, data.frame(num_arrivals = output$attrition_df$num_arrivals)), 
-       type = "l", add = T, col = "#C00000", lwd = 3)
-
-# Save splines
-write_rds(list(spline_vax = spline_vax, spline_att = spline_att), 
-          "_output manuscript/splines_d_low.rds")
-
-#------------------------------------------------------------------------------
-# 6b. Distribution D - high
-#------------------------------------------------------------------------------
-
-output <- SummarizeData(d_high)
-PlotVax(output$vax_df)
-PlotAttrition(output$attrition_df)
-
-# Fit spline model to data
-spline_vax <- glm(median ~ns(num_arrivals, df = 7), data = output$vax_df)
-spline_att <- glm(median ~ns(num_arrivals, df = 7), data = output$attrition_df)
-
-# Check fit for vax spline
-plot(output$vax_df$num_arrivals, output$vax_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number vaccinated",
-     main = "Density D, high attrition")
-points(output$vax_df$num_arrivals, 
-       predict(spline_vax, data.frame(num_arrivals = output$vax_df$num_arrivals)), 
-       type = "l", add = T, col = "skyblue3", lwd = 3)
-
-# Check fit for attrition spline
-plot(output$attrition_df$num_arrivals, output$attrition_df$median, pch = 16, 
-     xlab = "Number of dogs arrived", ylab = "Number lost to attrition",
-     main = "Density D, high attrition")
-points(output$attrition_df$num_arrivals, 
-       predict(spline_att, data.frame(num_arrivals = output$attrition_df$num_arrivals)), 
-       type = "l", add = T, col = "#C00000", lwd = 3)
-
-# Save splines
-write_rds(list(spline_vax = spline_vax, spline_att = spline_att), 
-          "_output manuscript/splines_d_high.rds")
-
-
