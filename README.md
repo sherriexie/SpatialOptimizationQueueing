@@ -1,6 +1,6 @@
 # Incorporating Queueing Theory into a Spatial Optimization Framework to Improve Mass Vaccination Programs
 
-This repository contains scripts used in the analysis presented in the manuscript titled _Incorporating Queueing Theory into a Spatial Optimization Framework to Improve Mass Vaccination Programs_. A description of the repository's contents are provided below.
+This repository contains scripts used in the analysis presented in the manuscript titled _Enhancing Mass Vaccination Programs with Queueing Theory and Spatial Optimization_. A description of the repository's contents are provided below.
 
 
 ## Optimization script files
