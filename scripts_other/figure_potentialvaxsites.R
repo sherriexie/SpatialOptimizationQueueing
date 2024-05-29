@@ -2,9 +2,8 @@ library(tidyverse)
 library(sf)
 library(ggmap)
 library(ggsn)
-## REMEMBER TO DELETE THESE WHEN UPLOADING TO GITHUB***
-register_google(key="AIzaSyBrwTLG8vz3RPeoVUrM4e6wcWMGOimtTrs")
-register_stadiamaps(key="07107bab-7f12-480f-812b-6ed99f0cb3e2")
+register_google(key="[REDACTED]")
+register_stadiamaps(key="[REDACTED]")
 
 ##-----------------------------------------------------------------------------
 # 1. Load and clean data 

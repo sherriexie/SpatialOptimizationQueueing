@@ -23,14 +23,16 @@ Scripts used to run the queueing simulations, generate figures, and conduct the 
 * **figure_potentialvaxsites.R** - maps the locations of all potential vaccination sites
 * **figure_arrivalhistograms.R** - generates the arrivals histograms that were presented in the manuscript
 * **figure_catchmentmaps.R** - maps the locations of optimized vaccination sites and numbers of expected arrivals that were presented in the manuscript
-* **sfig_poissonregression.R** - plots the MDVC participation probability function and the post-MDVC survey data that was used in the regression
+* **sfig_poissonregression.R** - fits and plots the MDVC participation probability function and the post-MDVC survey data that was used in the regression
 * **sa_balkingreneging.R** - evaluates sensitivity of results to misspecification of alpha and beta
 * **sa_inconstantarrivals....R** - evaluates sensitivity of results to the assumption of a constant arrival rate
 
 ## Data files
 
-Non-sensitive data used in the analysis are provided as single RDA file, which can be found in the **data** folder. Note that the locations of houses in the study area and the probability-distance matrix (containing the probability of each household participating in the campaign for all possible vaccination sites) have been removed to protect privacy.
+Non-sensitive data used in the analysis are provided as a single RDA file, which can be found in the **data** folder. Note that the locations of houses in the study area and the probability-distance matrix (containing the probability of each household participating in the campaign for all possible vaccination sites) have been removed to protect privacy.
 * **optimization_data.rda**
   - asa: shapefile of Alto Selva Algre (study area)
+  - queuedata: times of arrivals collected during an MDVC
   - supplycoord: coordinates of the potential vaccination sites in UTM projection
+  - survey: survey data used to fit the MDVC participation probability function
   

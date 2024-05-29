@@ -49,9 +49,9 @@ PlotVax <- function(df, spline, title = NULL, margin = 0){
   df$pred <- predict(spline, data.frame(num_arrivals = df$num_arrivals))
   
   ggplot(df, aes(x = num_arrivals)) +
-    geom_line(aes(y = median), color = "skyblue3", lwd = 1.1) +
+    geom_point(aes(y = median), color = "skyblue4", size = 2) +
     geom_ribbon(aes(ymin = lower_25, ymax = upper_75), fill = "skyblue3", alpha = 0.3) +
-    geom_line(aes(y = pred), linetype = "dashed", color = "black", lwd = 1) +
+    geom_line(aes(y = pred), color = "black", lwd = 1) +
     xlab("Number of dogs arrived") +
     ylab("Number vaccinated") +
     ggtitle(title) +
@@ -68,9 +68,9 @@ PlotAttrition <- function(df, spline, title = NULL, margin = 0){
   df$pred <- predict(spline, data.frame(num_arrivals = df$num_arrivals))
   
   ggplot(df, aes(x = num_arrivals)) +
-    geom_line(aes(y = median), linetype = "dashed", color = "#C00000", lwd = 1.1) +
+    geom_point(aes(y = median), color = "#C00000", size = 2) +
     geom_ribbon(aes(ymin = lower_25, ymax = upper_75), fill = "#C00000", alpha = 0.3) +
-    geom_line(aes(y = pred), linetype = "dashed", color = "black", lwd = 1) +
+    geom_line(aes(y = pred), color = "black", lwd = 1) +
     xlab("Number of dogs arrived") +
     ylab("Number lost to attrition") +
     ggtitle(title) +
@@ -145,7 +145,7 @@ a_bh <- PlotAttrition(SummarizeData(b_high)$attrition_df, spline_bh_att, "Densit
 a_ch <- PlotAttrition(SummarizeData(c_high)$attrition_df, spline_ch_att, "Density C, high attrition", 1)
 a_dh <- PlotAttrition(SummarizeData(d_high)$attrition_df, spline_dh_att, "Density D, high attrition", 1)
 
-pdf("_figures manuscript/R_output/sa_simulationresults.pdf", width = 24, height = 24)
+pdf("_figures manuscript/R_output/sa_simulationresults_POINTS.pdf", width = 24, height = 24)
 grid.arrange(v_a, a_a, v_ah, a_ah,
              v_b, a_b, v_bh, a_bh,
              v_c, a_c, v_ch, a_ch,

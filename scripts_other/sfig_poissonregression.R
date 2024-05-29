@@ -53,8 +53,8 @@ BinData <- function(df){
 ##-----------------------------------------------------------------------------
 
 # Bin raw data
-vac_raw <- readRDS("data/cleanedhouses_3.23.23.rds")
-vac_binned <- BinData(vac_raw)
+load("optimization_data.rda")
+vac_binned <- BinData(survey)
 
 # Fit Poisson model
 poisreg<-glm(num_vac~mean_distance+offset(log(num_of_houses)),
